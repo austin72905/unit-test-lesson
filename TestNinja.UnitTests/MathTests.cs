@@ -31,6 +31,10 @@ namespace TestNinja.UnitTests
         }
         //TearDown
 
+        /*
+            Trust Worthy Test
+            你改你實作方法的返回結果，如果還是pass，代表你測試錯東西了
+        */
 
         [Test]
         public void Add_WhenCalled_ReturnSumOfArguments()
