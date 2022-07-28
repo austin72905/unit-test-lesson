@@ -42,11 +42,18 @@ namespace TestNinja.UnitTests
             Assert.That(result, Is.EqualTo(3));
         }
 
+        /*
+            Ignore 標籤
+        
+            比起註解掉，使用這個標籤會提醒你那些測試被跳過了
+        */
+
         //修改為傳參的方式，比較美麗
         [Test]
         [TestCase(2,1,2)]   //使用這個標籤就能輕易地控制傳入的參數
         [TestCase(1, 2, 2)]
         [TestCase(1, 1, 1)]
+        [Ignore("為何要忽視這個測試")]
         public void Max_WhenCalled_ReturnGreaterArgument(int a,int b,int expectedResult)
         {
 
