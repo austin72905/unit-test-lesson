@@ -42,6 +42,21 @@ namespace TestNinja.UnitTests
             Assert.That(result, Is.EqualTo(3));
         }
 
+        //修改為傳參的方式，比較美麗
+        [Test]
+        [TestCase(2,1,2)]   //使用這個標籤就能輕易地控制傳入的參數
+        [TestCase(1, 2, 2)]
+        [TestCase(1, 1, 1)]
+        public void Max_WhenCalled_ReturnGreaterArgument(int a,int b,int expectedResult)
+        {
+
+            var result = _math.Max(a, b);
+
+            Assert.That(result, Is.EqualTo(expectedResult));
+
+        }
+
+        #region 改寫前
         [Test]
         public void Max_FirstArgumentIsGreater_ReturnFirstArgument()
         {
@@ -69,5 +84,6 @@ namespace TestNinja.UnitTests
 
             Assert.That(result, Is.EqualTo(1));
         }
+        #endregion
     }
 }
