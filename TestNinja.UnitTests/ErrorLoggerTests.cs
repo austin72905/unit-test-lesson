@@ -38,5 +38,21 @@ namespace TestNinja.UnitTests
 
             Assert.That(()=>logger.Log(error),Throws.ArgumentNullException);
         }
+
+        [Test]
+        public void Log_ValidError_RaiseErrorLoggedEvent()
+        {
+            var logger =new ErrorLogger();
+
+            var id = Guid.Empty;
+
+            //subscribe to that event in your test 
+            //被激發後，+=後面的函數會被執行
+            logger.ErrorLogged += (sender,args) => { id = args; };
+            //before acting
+            logger.Log("a");
+
+            Assert.That(id, Is.Not.EqualTo(Guid.Empty));
+        }
     }
 }
