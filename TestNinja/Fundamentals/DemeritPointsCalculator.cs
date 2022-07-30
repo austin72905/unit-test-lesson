@@ -7,13 +7,14 @@ namespace TestNinja.Fundamentals
         private const int SpeedLimit = 65;
         private const int MaxSpeed = 300;
         
+        //是否超速
         public int CalculateDemeritPoints(int speed)
         {
             if (speed < 0 || speed > MaxSpeed) 
                 throw new ArgumentOutOfRangeException();
             
             if (speed <= SpeedLimit) return 0; 
-            
+            //超速5公里才會拿到點數
             const int kmPerDemeritPoint = 5;
             var demeritPoints = (speed - SpeedLimit)/kmPerDemeritPoint;
 
