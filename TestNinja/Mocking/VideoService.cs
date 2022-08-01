@@ -13,11 +13,16 @@ namespace TestNinja.Mocking
         
             1. 傳參 : 之後改參數，用到這個方法的類都要改, hen煩
             2. 屬性
-            3. 建構函數
+            3. 建構函數  
+
+            DI Framework 推薦
+            1. Ninject
+            2. Autofac
          
         */
         private IFileReader _fileReader;
 
+        //用這個寫法，可以避免原本不是使用建構函數DI的類，不用整個重改
         public VideoService(IFileReader fileReader = null)
         {
             // fileReader == null 就用 new FileReader() 給值
