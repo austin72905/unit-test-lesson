@@ -9,9 +9,18 @@ namespace TestNinja.Mocking
 {
     public class VideoService
     {
-        public string ReadVideoTitle(IFileReader fileReader)
+        /*
+            3種DI途徑
+        
+            1. 傳參 : 之後改參數，用到這個方法的類都要改, hen煩
+            2. 屬性
+            3. 建構函數
+         
+        */
+        public IFileReader FileReader { get; set; }
+        public string ReadVideoTitle()
         {
-            var str = fileReader.Read("video.txt");
+            var str = FileReader.Read("video.txt");
             var video = JsonConvert.DeserializeObject<Video>(str);
             if (video == null)
                 return "Error parsing the video.";
