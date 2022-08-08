@@ -18,6 +18,11 @@ namespace TestNinja.Mocking
         {
             _db = new EmployeeContext();
         }
+
+        /*
+            這個類裡面的方法只對外部資源操作，不用對他做單元測試，因為未來可能會換框架，最後整合測試再測就好 
+         
+        */
         public void DeleteEmployee(int id)
         {
             var employee = _db.Employees.Find(id);
