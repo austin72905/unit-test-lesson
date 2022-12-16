@@ -11,7 +11,7 @@ namespace TestNinja.Mocking
             if (booking.Status == "Cancelled")
                 return string.Empty;
 
-            var unitOfWork = new UnitOfWork();
+            var unitOfWork = new UnitOfWork(); //這邊 有點向是查詢資料庫的行為，可以用 Repository 來獨立出來
             var bookings =
                 unitOfWork.Query<Booking>()
                     .Where(
