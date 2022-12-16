@@ -12,15 +12,15 @@ namespace TestNinja.Mocking
                 return string.Empty;
 
             // 因為是 static 沒辦法從建構函式使用DI，所以只能用傳參
-            var bookings=repository.GetActiveBookings(booking.Id);
+            var bookings = repository.GetActiveBookings(booking.Id);
+
+            // 乾 他之前有藏bug..
 
             var overlappingBooking =
                 bookings.FirstOrDefault(
                     b =>
-                        booking.ArrivalDate >= b.ArrivalDate
-                        && booking.ArrivalDate < b.DepartureDate
-                        || booking.DepartureDate > b.ArrivalDate
-                        && booking.DepartureDate <= b.DepartureDate);
+                        booking.ArrivalDate < b.DepartureDate &&
+                        b.ArrivalDate < booking.DepartureDate);
 
             return overlappingBooking == null ? string.Empty : overlappingBooking.Reference;
         }
