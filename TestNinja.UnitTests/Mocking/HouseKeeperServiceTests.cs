@@ -3,8 +3,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TestNinja.Mocking;
 
 namespace TestNinja.UnitTests.Mocking
@@ -20,11 +18,11 @@ namespace TestNinja.UnitTests.Mocking
 
         private Mock<IXtraMessageBox> _xtraMessageBox;
 
-        private DateTime _statementDate= new DateTime(2022, 12, 17);
+        private DateTime _statementDate = new DateTime(2022, 12, 17);
 
         private Housekeeper _housekeeper;
 
-        private readonly string _statementFileName = "fileName";
+        private string _statementFileName;
 
         [SetUp]
         public void SetUp()
@@ -38,7 +36,13 @@ namespace TestNinja.UnitTests.Mocking
 
             }.AsQueryable());
 
+            _statementFileName = "fileName";
             _statementGenerator = new Mock<IStatementGenerator>();
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
+                .Returns(() => _statementFileName);
+            //_statementFileName 這邊需要寫成 lamda ，他才會有lazy evaluatin 的功能，否則在各函式覆寫的 _statementFileName不會發生作用
+
             _emailSender = new Mock<IEmailSender>();
             _xtraMessageBox = new Mock<IXtraMessageBox>();
 
@@ -53,11 +57,9 @@ namespace TestNinja.UnitTests.Mocking
         [Test]
         public void SendStatementEmails_WhenCalled_GenerateStatements()
         {
-
-
             _service.SendStatementEmails(_statementDate);
             //測試SaveStatement這個函式是否有被呼叫
-            _statementGenerator.Verify(sg=>
+            _statementGenerator.Verify(sg =>
                 sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate));
         }
 
@@ -107,41 +109,42 @@ namespace TestNinja.UnitTests.Mocking
 
             _service.SendStatementEmails(_statementDate);
 
-            //這邊使用It.IsAny<string>()，如果你把特定的字串傳進去，因為這是實現細節，之後很可能修改，這樣會導致寫的測試很脆弱
-            _emailSender.Verify(es => es.EmailFile(
-                _housekeeper.Email, 
-                _housekeeper.StatementEmailBody,
-                _statementFileName,
-                It.IsAny<string>()));
+            VerfityEmailSend();
         }
 
 
         [Test]
         public void SendStatementEmails_StatementFileNameIsNull_ShouldNotEmailStatement()
         {
-            _statementGenerator
-                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
-                .Returns(()=>null); // 不能直接 return null，編譯器識別不出來
+            _statementFileName = null;
 
             _service.SendStatementEmails(_statementDate);
 
-            //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
-            _emailSender.Verify(es => es.EmailFile(
-                 It.IsAny<string>(),
-                 It.IsAny<string>(),
-                 It.IsAny<string>(),
-                 It.IsAny<string>()),Times.Never);
+            VerifyEmailNotSend();
         }
 
         [Test]
         public void SendStatementEmails_StatementFileNameIsEmptyString_ShouldNotEmailStatement()
         {
-            _statementGenerator
-                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
-                .Returns("");
+            _statementFileName = "";
 
             _service.SendStatementEmails(_statementDate);
 
+            VerifyEmailNotSend();
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsWhitespace_ShouldNotEmailStatement()
+        {
+            _statementFileName = " ";
+
+            _service.SendStatementEmails(_statementDate);
+
+            VerifyEmailNotSend();
+        }
+
+        private void VerifyEmailNotSend()
+        {
             //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
             _emailSender.Verify(es => es.EmailFile(
                  It.IsAny<string>(),
@@ -150,21 +153,14 @@ namespace TestNinja.UnitTests.Mocking
                  It.IsAny<string>()), Times.Never);
         }
 
-        [Test]
-        public void SendStatementEmails_StatementFileNameIsWhitespace_ShouldNotEmailStatement()
+        private void VerfityEmailSend()
         {
-            _statementGenerator
-                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
-                .Returns(" ");
-
-            _service.SendStatementEmails(_statementDate);
-
-            //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
+            //這邊使用It.IsAny<string>()，如果你把特定的字串傳進去，因為這是實現細節，之後很可能修改，這樣會導致寫的測試很脆弱
             _emailSender.Verify(es => es.EmailFile(
-                 It.IsAny<string>(),
-                 It.IsAny<string>(),
-                 It.IsAny<string>(),
-                 It.IsAny<string>()), Times.Never);
+                _housekeeper.Email,
+                _housekeeper.StatementEmailBody,
+                _statementFileName,
+                It.IsAny<string>()));
         }
     }
 }
