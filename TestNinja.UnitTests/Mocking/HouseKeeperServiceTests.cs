@@ -58,5 +58,41 @@ namespace TestNinja.UnitTests.Mocking
             _statementGenerator.Verify(sg=>
                 sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate));
         }
+
+        [Test]
+        public void SendStatementEmails_HouseKeeperEmailIsNull_ShouldNotGenerateStatement()
+        {
+            _housekeeper.Email = null;
+
+            _service.SendStatementEmails(_statementDate);
+            //他第二個參數可以測試，裡面的某個函數被呼叫了幾次
+            _statementGenerator.Verify(sg =>
+                sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate),
+                Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_HouseKeeperEmailIsWhitespace_ShouldNotGenerateStatement()
+        {
+            _housekeeper.Email = " ";
+
+            _service.SendStatementEmails(_statementDate);
+            //他第二個參數可以測試，裡面的某個函數被呼叫了幾次
+            _statementGenerator.Verify(sg =>
+                sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate),
+                Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_HouseKeeperEmailIsEmpty_ShouldNotGenerateStatement()
+        {
+            _housekeeper.Email = "";
+
+            _service.SendStatementEmails(_statementDate);
+            //他第二個參數可以測試，裡面的某個函數被呼叫了幾次
+            _statementGenerator.Verify(sg =>
+                sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate),
+                Times.Never);
+        }
     }
 }
