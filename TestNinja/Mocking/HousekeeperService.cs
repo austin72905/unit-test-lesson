@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TestNinja.Mocking
 {
-    public class HousekeeperHelper
+    public class HousekeeperService
     {
        
         private readonly IUnitOfWork _unitOfWork;
@@ -14,7 +14,8 @@ namespace TestNinja.Mocking
         private readonly IEmailSender _emailSender;
         private readonly IXtraMessageBox _xtraMessageBox;
 
-        public HousekeeperHelper(IUnitOfWork unitOfWork, IStatementGenerator statementGenerator, IEmailSender emailSender, IXtraMessageBox xtraMessageBox)
+        // 他是許多服務的協作者 _statementGenerator、_emailSender..，所以他本身算是一個服務了，故改名為 service
+        public HousekeeperService(IUnitOfWork unitOfWork, IStatementGenerator statementGenerator, IEmailSender emailSender, IXtraMessageBox xtraMessageBox)
         {
             _unitOfWork=unitOfWork;
             _statementGenerator = statementGenerator;
