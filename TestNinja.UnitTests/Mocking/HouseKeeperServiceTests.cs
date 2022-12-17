@@ -24,6 +24,8 @@ namespace TestNinja.UnitTests.Mocking
 
         private Housekeeper _housekeeper;
 
+        private readonly string _statementFileName = "fileName";
+
         [SetUp]
         public void SetUp()
         {
@@ -54,7 +56,7 @@ namespace TestNinja.UnitTests.Mocking
 
 
             _service.SendStatementEmails(_statementDate);
-
+            //測試SaveStatement這個函式是否有被呼叫
             _statementGenerator.Verify(sg=>
                 sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate));
         }
@@ -93,6 +95,76 @@ namespace TestNinja.UnitTests.Mocking
             _statementGenerator.Verify(sg =>
                 sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate),
                 Times.Never);
+        }
+
+
+        [Test]
+        public void SendStatementEmails_WhenCalled_EmailStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
+                .Returns(_statementFileName);
+
+            _service.SendStatementEmails(_statementDate);
+
+            //這邊使用It.IsAny<string>()，如果你把特定的字串傳進去，因為這是實現細節，之後很可能修改，這樣會導致寫的測試很脆弱
+            _emailSender.Verify(es => es.EmailFile(
+                _housekeeper.Email, 
+                _housekeeper.StatementEmailBody,
+                _statementFileName,
+                It.IsAny<string>()));
+        }
+
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsNull_ShouldNotEmailStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
+                .Returns(()=>null); // 不能直接 return null，編譯器識別不出來
+
+            _service.SendStatementEmails(_statementDate);
+
+            //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
+            _emailSender.Verify(es => es.EmailFile(
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>()),Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsEmptyString_ShouldNotEmailStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
+                .Returns("");
+
+            _service.SendStatementEmails(_statementDate);
+
+            //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
+            _emailSender.Verify(es => es.EmailFile(
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsWhitespace_ShouldNotEmailStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_housekeeper.Oid, _housekeeper.FullName, _statementDate))
+                .Returns(" ");
+
+            _service.SendStatementEmails(_statementDate);
+
+            //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
+            _emailSender.Verify(es => es.EmailFile(
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>(),
+                 It.IsAny<string>()), Times.Never);
         }
     }
 }
