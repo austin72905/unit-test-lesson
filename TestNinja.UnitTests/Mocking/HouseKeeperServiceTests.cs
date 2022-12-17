@@ -143,6 +143,22 @@ namespace TestNinja.UnitTests.Mocking
             VerifyEmailNotSend();
         }
 
+
+        [Test]
+        public void SendStatementEmails_EmailSendingFails_DisplayAMessageBox()
+        {
+            _emailSender.Setup(es => es.EmailFile(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()
+                )).Throws<Exception>();
+
+            _service.SendStatementEmails(_statementDate);
+
+            _xtraMessageBox.Verify(ms => ms.Show(It.IsAny<string>(), It.IsAny<string>(), MessageBoxButtons.OK));
+        }
+
         private void VerifyEmailNotSend()
         {
             //這邊只關注 EmailFile 不該被呼叫，所以傳進去的值就不重要了，故改成It.IsAny<string>()
